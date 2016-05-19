@@ -1,0 +1,2 @@
+class MzComment(object):
+    pass
