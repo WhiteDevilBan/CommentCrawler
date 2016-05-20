@@ -1,45 +1,57 @@
-import json
-from urllib import request
 import html
-from bs4 import BeautifulSoup
-
-from site.mybzz.domain.MzComment import MzComment
 from site.mybzz.util import DbUtil
+from site.mybzz.util import BsUtil
+from site.mybzz.util import DateUtil
 
-def getData():
-    req = request.urlopen(
-        'http://app.flyme.cn/apps/public/evaluate/list?app_id=3072599&start=0&max=10000')
 
-    data = req.read().decode()
-    print(data)
-    value = json.loads(data)
-    count = 0
-    comment = MzComment()
+def getData(id,package_name):
+
+    total = BsUtil.praseJson('http://app.flyme.cn/apps/public/evaluate/list?app_id=%s&start=0&max=1' % id)
     conn,cur = DbUtil.getConn()
-    for com in value['value']['list']:
-        # print('第%d个评论' % count)
-        comment.comment = html.unescape(com['comment'])
-        # print('内容:', comment.comment)
-        comment.time = com['create_time']
-        # print('时间:', comment.time)
-        comment.author = html.unescape(com['user_name'])
-        # print('作者:', comment.author)
-        comment.score = com['star']
-        # print('评分:', comment.score)
-        count += 1
-        print('INSERT INTO comment(game_name, content, comment_time, author, score) VALUES ("%s", "%s", "%s", "%s", %d);' % ('皇室战争',comment.comment,comment.time,comment.author,comment.score))
-        cur.execute('INSERT INTO comment(game_name, content, comment_time, author, score) VALUES ("%s", "%s", "%s", "%s", %d);' % ('皇室战争',comment.comment,comment.time,comment.author,comment.score))
-    conn.commit()
-    comment.totalComCount = value['value']['totalCount']
-    print(comment.totalComCount)
+
+    totalComCount = total['value']['totalCount']
     # 获取总下载量和评分
-    req2 = request.urlopen('http://app.flyme.cn/games/public/detail?package_name=com.supercell.clashroyale.mz')
-    soup = BeautifulSoup(req2.read().decode('UTF-8'), "html.parser")
-    comment.totalScore = soup.find('div', class_="star_bg").attrs['data-num']
-    print('总评分：', comment.totalScore)
-    comment.totalDownload = soup.find(text="下      载：").parent.next_sibling.next_sibling.string
-    print("总下载量：", comment.totalDownload)
+    soup = BsUtil.praseHtml('http://app.flyme.cn/games/public/detail?package_name=%s' % package_name)
+
+    totalScore = soup.find('div', class_="star_bg").attrs['data-num']
+    totalDownload = soup.find(text="下      载：").parent.next_sibling.next_sibling.string
+    #获取游戏名
+    for child in soup.find('div', class_="detail_top").children:
+        if (child.name == 'h3'):
+            game_name = child.string
+
+    cur.execute('INSERT INTO games(game_name,from_store, total_comment_count, total_score, total_download, data_date) '
+          'VALUES ("%s", "%s", "%s", "%s", "%s", "%s");' %(game_name,'meizu',totalComCount,
+            totalScore,totalDownload,DateUtil.currentDate()))
+    game_id = cur.lastrowid
+    #获取所有评论内容
+    value = BsUtil.praseJson('http://app.flyme.cn/apps/public/evaluate/list?app_id=%s&start=0&max=%s'% (id,totalComCount))
+
+    for com in value['value']['list']:
+        comment = html.unescape(com['comment']).replace("\"","'")
+        time = com['create_time']
+        author = html.unescape(com['user_name']).replace("\"","'")
+        score = com['star']
+
+        try:
+            cur.execute('INSERT INTO comment(game_id, content, comment_time, author, score) '
+                    'VALUES ("%s", "%s", "%s", "%s", %d);' % (game_id,comment,time,author,score))
+        except:
+            pass
+
+    conn.commit()
+    DbUtil.close(conn,cur)
+
+
+def getTop50():
+    result = BsUtil.praseJson('http://api-game.meizu.com/games/public/top/layout?start=0&max=50')
+    for game in result['value']['blocks'][0]['data'][3:4]:
+        print('游戏名：%s,id：%s,包名：%s' % (game['name'],game['id'],game['package_name']))
+        try:
+            getData(game['id'],game['package_name'])
+        except:
+            pass
 
 
 if __name__ == '__main__':
-    getData()
+    getTop50()
