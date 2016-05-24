@@ -53,10 +53,10 @@ def getData(id, name, totalScore):
             try:
                 print('INSERT INTO comment(game_id, content, comment_time, author, score) '
                       'VALUES ("%s", "%s", "%s", "%s", %d);' % (
-                          game_id, content, DateUtil.lomgToStrTime(time / 1000), author, score))
+                          game_id, content, DateUtil.longToStrTime(time / 1000), author, score))
                 cur.execute('INSERT INTO comment(game_id, content, comment_time, author, score) '
                             'VALUES ("%s", "%s", "%s", "%s", %d);' % (
-                                game_id, content, DateUtil.lomgToStrTime(time / 1000), author, score))
+                                game_id, content, DateUtil.longToStrTime(time / 1000), author, score))
             except:
                 print(sys.exc_info()[0], ":", sys.exc_info()[1])
                 pass

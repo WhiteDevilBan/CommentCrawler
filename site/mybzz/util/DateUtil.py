@@ -9,5 +9,5 @@ def currentTime():
 def currentDate():
     return datetime.date.today()
 
-def lomgToStrTime(t):
+def longToStrTime(t):
     return time.strftime(TIMEFORMAT, time.localtime(t))

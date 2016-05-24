@@ -16,7 +16,12 @@ def getData(groupId, packageId):
     result = BsUtil.praseGzipJson(url)
 
     for comment in result['data']:
-        print(comment['content'])
+        # print(comment['user_name'], comment['content'].replace('\n', ''),
+        #       DateUtil.longToStrTime(int(comment['create_time'])), comment['score'])
+        print('INSERT INTO comment(game_id, content, comment_time, author, score) '
+              'VALUES ("%s", "%s", "%s", "%s", %d);' % (
+                  0, comment['content'].replace('\n', ''), DateUtil.longToStrTime(int(comment['create_time'])),
+                  comment['user_name'], comment['score']))
 
 
 def getTop15():
@@ -25,10 +30,14 @@ def getTop15():
 
     for app in json_result['result']['data']:
         appInfo = app['itemdata']
-        print('游戏名：%s，docid：%s，groupid：%s，packageid：%s，score：%s，display_download：%s，commentsnum：%s' % (
-            appInfo['sname'], appInfo['docid'], appInfo['groupid'], appInfo['packageid'],
-            round(int(appInfo['score']) / 20, 1),
-            appInfo['display_download'], appInfo['commentsnum'][:-2]))
+        # print('游戏名：%s，docid：%s，groupid：%s，packageid：%s，score：%s，display_download：%s，commentsnum：%s' % (
+        #     appInfo['sname'], appInfo['docid'], appInfo['groupid'], appInfo['packageid'],
+        #     round(int(appInfo['score']) / 20, 1),
+        #     appInfo['display_download'], appInfo['commentsnum'][:-2]))
+        print('INSERT INTO games(game_name,from_store, total_comment_count, total_score, total_download, data_date) '
+              'VALUES ("%s", "%s", "%s", "%s", "%s", "%s");' % (
+                  appInfo['sname'], 'baidu', appInfo['commentsnum'][:-2], round(int(appInfo['score']) / 20, 1),
+                  appInfo['display_download'], DateUtil.currentDate()))
         getData(appInfo['groupid'], appInfo['packageid'])
 
 
