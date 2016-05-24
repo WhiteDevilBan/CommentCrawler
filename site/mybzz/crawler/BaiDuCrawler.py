@@ -2,7 +2,7 @@ from site.mybzz.util import DbUtil
 from site.mybzz.util import BsUtil
 from site.mybzz.util import DateUtil
 
-conn, cur = DbUtil.getConn()
+# conn, cur = DbUtil.getConn()
 
 
 def getData(groupId, packageId):
@@ -19,7 +19,7 @@ def getData(groupId, packageId):
         # print(comment['user_name'], comment['content'].replace('\n', ''),
         #       DateUtil.longToStrTime(int(comment['create_time'])), comment['score'])
         print('INSERT INTO comment(game_id, content, comment_time, author, score) '
-              'VALUES ("%s", "%s", "%s", "%s", %d);' % (
+              'VALUES ("%s", "%s", "%s", "%s", %s);' % (
                   0, comment['content'].replace('\n', ''), DateUtil.longToStrTime(int(comment['create_time'])),
                   comment['user_name'], comment['score']))
 
