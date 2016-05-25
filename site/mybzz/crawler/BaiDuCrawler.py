@@ -2,11 +2,10 @@ from site.mybzz.util import DbUtil
 from site.mybzz.util import BsUtil
 from site.mybzz.util import DateUtil
 
+conn, cur = DbUtil.getConn()
 
-# conn, cur = DbUtil.getConn()
 
-
-def getData(groupId):
+def getData(groupId, game_id):
     try:
         url = "http://m.baidu.com/appsrv?action=getcommentlist&native_api=1&groupid=%s&start=0&count=1" % (
             groupId)
@@ -20,10 +19,17 @@ def getData(groupId):
         for comment in result['data']:
             print('INSERT INTO comment(game_id, content, comment_time, author, score) '
                   'VALUES ("%s", "%s", "%s", "%s", %s);' % (
-                      0, comment['content'].replace('\n', ''), DateUtil.longToStrTime(int(comment['create_time'])),
+                      game_id, comment['content'].replace('\n', ''),
+                      DateUtil.longToStrTime(int(comment['create_time'])),
                       comment['user_name'], comment['score']))
+            cur.execute('INSERT INTO comment(game_id, content, comment_time, author, score) '
+                        'VALUES ("%s", "%s", "%s", "%s", %s);' % (
+                            game_id, comment['content'].replace('\n', ''),
+                            DateUtil.longToStrTime(int(comment['create_time'])),
+                            comment['user_name'], comment['score']))
     except:
         pass
+
 
 def getTop15():
     json_result = BsUtil.praseGzipJson(
@@ -33,17 +39,25 @@ def getTop15():
         appInfo = app['itemdata']
         print('INSERT INTO games(game_name,from_store, total_comment_count, total_score, total_download, data_date) '
               'VALUES ("%s", "%s", "%s", "%s", "%s", "%s");' % (
-                  appInfo['sname'], 'baidu', appInfo['commentsnum'][:-2], round(int(appInfo['score']) / 20, 1),
+                  appInfo['sname'], 'baidu', appInfo['commentsnum'][:-2], 10 * round(int(appInfo['score']) / 20, 1),
                   appInfo['display_download'], DateUtil.currentDate()))
-        getData(appInfo['groupid'])
+        cur.execute(
+            'INSERT INTO games(game_name,from_store, total_comment_count, total_score, total_download, data_date) '
+            'VALUES ("%s", "%s", "%s", "%s", "%s", "%s");' % (
+                appInfo['sname'], 'baidu', appInfo['commentsnum'][:-2], 10 * round(int(appInfo['score']) / 20, 1),
+                appInfo['display_download'], DateUtil.currentDate()))
+        game_id = cur.lastrowid
+        getData(appInfo['groupid'], game_id)
 
         detailUrl = "http://m.baidu.com/appsrv?action=detail&native_api=1&docid=%s" % appInfo['docid']
         detail = BsUtil.praseGzipJson(detailUrl)
 
         for version in detail['result']['data']['app_moreversion']:
-            getData(version['content'][0]['groupid'])
+            getData(version['content'][0]['groupid'], game_id)
         print('------------------------------------------------------')
 
 
 if __name__ == '__main__':
     getTop15()
+    conn.commit()
+    DbUtil.close(conn, cur)
