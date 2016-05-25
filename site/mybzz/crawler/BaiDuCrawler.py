@@ -18,8 +18,6 @@ def getData(groupId):
         result = BsUtil.praseGzipJson(url)
 
         for comment in result['data']:
-            # print(comment['user_name'], comment['content'].replace('\n', ''),
-            #       DateUtil.longToStrTime(int(comment['create_time'])), comment['score'])
             print('INSERT INTO comment(game_id, content, comment_time, author, score) '
                   'VALUES ("%s", "%s", "%s", "%s", %s);' % (
                       0, comment['content'].replace('\n', ''), DateUtil.longToStrTime(int(comment['create_time'])),
@@ -42,15 +40,9 @@ def getTop15():
         detailUrl = "http://m.baidu.com/appsrv?action=detail&native_api=1&docid=%s" % appInfo['docid']
         detail = BsUtil.praseGzipJson(detailUrl)
 
-        # print(detail['result']['data']['groupid'])
         for version in detail['result']['data']['app_moreversion']:
-            # print(version['content'][0]['groupid'])
             getData(version['content'][0]['groupid'])
         print('------------------------------------------------------')
-        # print('游戏名：%s，docid：%s，groupid：%s，packageid：%s，score：%s，display_download：%s，commentsnum：%s' % (
-        #     appInfo['sname'], appInfo['docid'], appInfo['groupid'], appInfo['packageid'],
-        #     round(int(appInfo['score']) / 20, 1),
-        #     appInfo['display_download'], appInfo['commentsnum'][:-2]))
 
 
 if __name__ == '__main__':
