@@ -33,7 +33,9 @@ def getData(groupId, game_id):
 
 def getTop15():
     json_result = BsUtil.praseGzipJson(
-        'http://m.baidu.com/appsrv?action=ranklist&native_api=1&pu=ctv%401%2Ccfrom%401000561u%2Ccua%40gu2ki4uq-igBNE6lI5me6NNy2I_UCvhlSdNqA%2Ccuid%400u-Yu0PYH8jVavuO_a-YagiSS8lvuvu9_a2L80ufvi6kuviJlavefYamv8_6uvtz_a2etxNNB%2Ccut%40rIviC_C0vC_7uLP7NJGCjxNIB%2Cosname%40baiduappsearch&name=game')
+        'http://m.baidu.com/appsrv?action=ranklist&native_api=1&pu=ctv%401%2Ccfrom%401000561u%2Ccua%40gu2ki4uq-'
+        'igBNE6lI5me6NNy2I_UCvhlSdNqA%2Ccuid%400u-Yu0PYH8jVavuO_a-YagiSS8lvuvu9_a2L80ufvi6kuviJlavefYamv8_6uvtz'
+        '_a2etxNNB%2Ccut%40rIviC_C0vC_7uLP7NJGCjxNIB%2Cosname%40baiduappsearch&name=game')
 
     for app in json_result['result']['data']:
         appInfo = app['itemdata']
