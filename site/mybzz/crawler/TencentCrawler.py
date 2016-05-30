@@ -4,36 +4,52 @@ from site.mybzz.util import DbUtil
 from site.mybzz.util import BsUtil
 from site.mybzz.util import DateUtil
 
+conn, cur = DbUtil.getConn()
+
 
 def getData(name, downloadCount, score, packageName):
     contextData = ''
     url = "http://sj.qq.com/myapp/app/comment.htm?apkName=%s&contextData=%s"
-    result = BsUtil.praseJson(url % (packageName, contextData))
 
-    totalComCount = result['obj']['total']
+    totalComCount = 0
+    while totalComCount == 0:
+        try:
+            result = BsUtil.praseJson(url % (packageName, contextData))
+            totalComCount = result['obj']['total']
+        except:
+            pass
+
     print(
         'INSERT INTO games(game_name,from_store, total_comment_count, total_score, total_download, data_date) '
         'VALUES ("%s", "%s", "%s", %d, "%s", "%s");' % (
             name, 'qq', totalComCount, score, downloadCount, DateUtil.currentDate()))
-
+    cur.execute('INSERT INTO games(game_name,from_store, total_comment_count, total_score, total_download, data_date) '
+                'VALUES ("%s", "%s", "%s", %d, "%s", "%s");' % (
+                    name, 'qq', totalComCount, score, downloadCount, DateUtil.currentDate()))
+    game_id = cur.lastrowid
     while (True):
-        result = BsUtil.praseJson(url % (packageName, contextData))
         try:
+            result = BsUtil.praseJson(url % (packageName, contextData))
             if not result['success']:
                 continue
             if result['obj']['hasNext'] != 1:
                 break
 
+            contextData = result['obj']['contextData']
+
             for comment in result['obj']['commentDetails']:
                 print('INSERT INTO comment(game_id, content, comment_time, author, score) '
-                      'VALUES ("%s", "%s", "%s", "%s", %s);' % (
-                          0, comment['content'].replace('\r', ''), DateUtil.longToStrTime(int(comment['createdTime'])),
-                          comment['nickName'], comment['score']))
-                # print(comment)
-                # if comment['nickName'] == "♀少说多笑]^ω^[":
-                #     print(comment)
-            contextData = result['obj']['contextData']
+                      'VALUES ("%s", "%s", "%s", "%s", %d);' % (
+                          game_id, comment['content'].replace('\r', '').replace(' ', ''),
+                          DateUtil.longToStrTime(int(comment['createdTime'])),
+                          comment['nickName'], int(comment['score']) * 10))
+                cur.execute('INSERT INTO comment(game_id, content, comment_time, author, score) '
+                            'VALUES ("%s", "%s", "%s", "%s", %s);' % (
+                                game_id, comment['content'].replace('\r', '').replace(" ", ""),
+                                DateUtil.longToStrTime(int(comment['createdTime'])),
+                                comment['nickName'], int(comment['score']) * 10))
         except:
+            conn.commit()
             print(result)
             print(sys.exc_info()[0], ":", sys.exc_info()[1])
 
@@ -49,5 +65,6 @@ def getTop():
 
 
 if __name__ == '__main__':
-    # getTop()
-    getData('', 0, 0, packageName='com.qqgame.hlddz')
+    getTop()
+    # getData('', 0, 0, packageName='com.qqgame.hlddz')
+    DbUtil.close(conn, cur)
