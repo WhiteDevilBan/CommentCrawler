@@ -35,6 +35,7 @@ def getComment(url, game_id):
         except:
             pass
 
+
 def getData(id, totalComCount, game_id):
     start = 0
     while (totalComCount > 0):
