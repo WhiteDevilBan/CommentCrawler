@@ -1,14 +1,10 @@
 import random
 from operator import itemgetter
-
 import jieba
 import jieba.analyse
 from pytagcloud import make_tags, create_tag_image
 from pytagcloud.colors import COLOR_SCHEMES
-
 from site.mybzz.util import DbUtil
-
-# conn, cur = DbUtil.getConn()
 
 stop = []
 
@@ -17,7 +13,6 @@ def plot(game_name, game_id):
     comments = DbUtil.getAllResult("select * from comment where game_id = %s" % game_id)
     for comment in comments:
 
-        # print(comment[2])
         result = jieba.analyse.extract_tags(comment[2], topK=3)
 
         for word in result:
@@ -30,8 +25,6 @@ def plot(game_name, game_id):
                 dict[word] = 1
             else:
                 dict[word] += 1
-                # print(",".join(jieba.analyse.extract_tags(comment[2], topK=3)))
-                # print('-------------')
 
     print(dict)
 
@@ -62,12 +55,6 @@ if __name__ == '__main__':
         if not line:
             break
         stop.append(line)
-    # result = jieba.cut('希望能看见我的话我的破血头啊啊啊')
-    #
-    # for seg in result:
-    #     print(seg)
-    #
-    # print(",".join(jieba.analyse.extract_tags('希望能看见我的话我的破血头啊啊啊', topK=3)))
 
     games = DbUtil.getAllResult("select game_id,games.game_name from `comment` join games on game_id = games.id GROUP BY game_id ORDER BY count(game_id) desc limit 50")
 
@@ -76,5 +63,3 @@ if __name__ == '__main__':
         if game[1] not in l:
             plot(game[1], game[0])
             l.append(game[1])
-            # print(game[1], game[0])
-    # print(l)
