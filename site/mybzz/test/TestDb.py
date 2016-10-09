@@ -1,6 +1,9 @@
 import pymysql
 import time
 import datetime
+
+from snownlp import SnowNLP
+
 from site.mybzz.util import DbUtil
 from site.mybzz.util import DateUtil
 
@@ -24,15 +27,22 @@ from site.mybzz.util import DateUtil
 conn, cur = DbUtil.getConn()
 
 
-if __name__ == '__main__':
-    comments = DbUtil.getAllResult("select * from comment where game_id = 275 limit 10000")
-    file = open("c:/穿越火线_输入.txt", "w", encoding = "GBK")
-    for comment in comments:
-        try:
-            print(comment[2])
-            file.write(comment[2])
-        except:
-            pass
+# if __name__ == '__main__':
+#     comments = DbUtil.getAllResult("select * from comment where game_id = 275 limit 10000")
+#     file = open("c:/穿越火线_输入.txt", "w", encoding = "GBK")
+#     for comment in comments:
+#         try:
+#             print(comment[2])
+#             file.write(comment[2])
+#         except:
+#             pass
+
+word = DbUtil.getOneResult('select keyword from keyword limit 1')
+print(eval(word[0]))
+dict = eval(word[0])
+
+for key in dict:
+    print(key, SnowNLP(key).sentiments)
 # if list:
 #     print("11")
 # else:

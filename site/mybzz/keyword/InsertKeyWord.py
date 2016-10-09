@@ -33,15 +33,16 @@ def plot(game_name, game_id):
 
     tags = make_tags(swd,
                      minsize=30,
-                     maxsize=120,
+                     maxsize=100,
                      colors=random.choice(list(COLOR_SCHEMES.values())))
 
 
     create_tag_image(tags,
-                 'c:/wordcloud/%s.png' % game_name,
+                 'C:/Users/Administrator/Desktop/%s_%s.png' % (game_name, game_id),
                  background=(0, 0, 0, 255),
                  size=(900, 600),
                  fontname='SimHei')
+    print('create file ---%s' % game_name)
 
     # dict = {}
     #
@@ -51,8 +52,8 @@ def plot(game_name, game_id):
     # cur.execute('INSERT INTO keyword (game_id, keyword) VALUES (%s, "%s")' % (game_id, str(dict)))
     # conn.commit()
 
-    # word = DbUtil.getOneResult('select keyword from keyword limit 1')
-    # print(eval(word[0]))
+    word = DbUtil.getOneResult('select keyword from keyword limit 1')
+    print(eval(word[0]))
 
 
 if __name__ == '__main__':
@@ -67,8 +68,9 @@ if __name__ == '__main__':
             break
         stop.append(line)
 
-    games = DbUtil.getAllResult(
-        "select game_id,games.game_name from `comment` join games on game_id = games.id GROUP BY game_id ORDER BY count(game_id) desc")
-
-    for game in games:
-        plot(game[1], game[0])
+    # games = DbUtil.getAllResult(
+    #     "select game_id,games.game_name from `comment` join games on game_id = games.id GROUP BY game_id ORDER BY count(game_id) desc")
+    #
+    # for game in games:
+    #     plot(game[1], game[0])
+    plot('皇室战争', 189)

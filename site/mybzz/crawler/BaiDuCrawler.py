@@ -22,11 +22,11 @@ def getData(groupId, game_id):
                       game_id, comment['content'].replace('\n', ''),
                       DateUtil.longToStrTime(int(comment['create_time'])),
                       comment['user_name'], comment['score']))
-            cur.execute('INSERT INTO comment(game_id, content, comment_time, author, score) '
-                        'VALUES ("%s", "%s", "%s", "%s", %s);' % (
-                            game_id, comment['content'].replace('\n', ''),
-                            DateUtil.longToStrTime(int(comment['create_time'])),
-                            comment['user_name'], comment['score']))
+            # cur.execute('INSERT INTO comment(game_id, content, comment_time, author, score) '
+            #             'VALUES ("%s", "%s", "%s", "%s", %s);' % (
+            #                 game_id, comment['content'].replace('\n', ''),
+            #                 DateUtil.longToStrTime(int(comment['create_time'])),
+            #                 comment['user_name'], comment['score']))
     except:
         pass
 
@@ -43,19 +43,19 @@ def getTop15():
               'VALUES ("%s", "%s", "%s", "%s", "%s", "%s");' % (
                   appInfo['sname'], 'baidu', appInfo['commentsnum'][:-2], 10 * round(int(appInfo['score']) / 20, 1),
                   appInfo['display_download'], DateUtil.currentDate()))
-        cur.execute(
-            'INSERT INTO games(game_name,from_store, total_comment_count, total_score, total_download, data_date) '
-            'VALUES ("%s", "%s", "%s", "%s", "%s", "%s");' % (
-                appInfo['sname'], 'baidu', appInfo['commentsnum'][:-2], 10 * round(int(appInfo['score']) / 20, 1),
-                appInfo['display_download'], DateUtil.currentDate()))
-        game_id = cur.lastrowid
-        getData(appInfo['groupid'], game_id)
+        # cur.execute(
+        #     'INSERT INTO games(game_name,from_store, total_comment_count, total_score, total_download, data_date) '
+        #     'VALUES ("%s", "%s", "%s", "%s", "%s", "%s");' % (
+        #         appInfo['sname'], 'baidu', appInfo['commentsnum'][:-2], 10 * round(int(appInfo['score']) / 20, 1),
+        #         appInfo['display_download'], DateUtil.currentDate()))
+        # game_id = cur.lastrowid
+        getData(appInfo['groupid'], 0)
 
         detailUrl = "http://m.baidu.com/appsrv?action=detail&native_api=1&docid=%s" % appInfo['docid']
         detail = BsUtil.praseGzipJson(detailUrl)
 
         for version in detail['result']['data']['app_moreversion']:
-            getData(version['content'][0]['groupid'], game_id)
+            getData(version['content'][0]['groupid'], 0)
         print('------------------------------------------------------')
 
 

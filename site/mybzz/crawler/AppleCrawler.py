@@ -1,9 +1,6 @@
 import json
 from urllib import request
-
 import zlib
-
-import sys
 from bs4 import BeautifulSoup
 import re
 from site.mybzz.util import DbUtil

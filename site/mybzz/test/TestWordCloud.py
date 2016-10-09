@@ -3,6 +3,7 @@ from operator import itemgetter
 
 from pytagcloud import make_tags, create_tag_image
 from pytagcloud.colors import COLOR_SCHEMES
+from snownlp import SnowNLP
 
 path= 'c:/结果/dict.txt'
 if __name__ == '__main__':
@@ -20,14 +21,18 @@ if __name__ == '__main__':
 
     swd = sorted(dict.items(), key=itemgetter(1), reverse=True)
     swd = swd[1:50]
-    print(swd)
 
-    dict ={}
+    for word in swd:
+        print(word[0],SnowNLP(word[0]).sentiments)
+        # print(word[0])
+    # print(swd)
 
-    for (k,v) in swd:
-        # print(k,v)
-        dict[k] = v
-    print(dict)
+    # dict ={}
+    #
+    # for (k,v) in swd:
+    #     # print(k,v)
+    #     dict[k] = v
+    # print(dict)
     # tags = make_tags(swd,
     #                  minsize=30,
     #                  maxsize=130,
