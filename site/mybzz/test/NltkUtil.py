@@ -6,8 +6,8 @@ from nltk.probability import FreqDist, ConditionalFreqDist
 
 
 def create_word_scores():
-    posWords = pickle.load(open('pos_review.pkl', 'r'))
-    negWords = pickle.load(open('neg_review.pkl', 'r'))
+    posWords = pickle.load(open('pos_review.pkl', 'rb'))
+    negWords = pickle.load(open('neg_review.pkl', 'rb'))
 
     posWords = list(itertools.chain(*posWords))  # 把多维数组解链成一维数组
     negWords = list(itertools.chain(*negWords))  # 同理
@@ -37,8 +37,8 @@ def create_word_scores():
 
 
 def create_word_bigram_scores():
-    posdata = pickle.load(open('pos_review.pkl', 'r'))
-    negdata = pickle.load(open('neg_review.pkl', 'r'))
+    posdata = pickle.load(open('pos_review.pkl', 'rb'))
+    negdata = pickle.load(open('neg_review.pkl', 'rb'))
 
     posWords = list(itertools.chain(*posdata))
     negWords = list(itertools.chain(*negdata))
@@ -54,18 +54,18 @@ def create_word_bigram_scores():
     word_fd = FreqDist()
     cond_word_fd = ConditionalFreqDist()
     for word in pos:
-        word_fd.inc(word)
-        cond_word_fd['pos'].inc(word)
+        word_fd[word] += 1
+        cond_word_fd['pos'][word] += 1
     for word in neg:
-        word_fd.inc(word)
-        cond_word_fd['neg'].inc(word)
+        word_fd[word] += 1
+        cond_word_fd['neg'][word] += 1
 
     pos_word_count = cond_word_fd['pos'].N()
     neg_word_count = cond_word_fd['neg'].N()
     total_word_count = pos_word_count + neg_word_count
 
     word_scores = {}
-    for word, freq in word_fd.iteritems():
+    for word, freq in word_fd.items():
         pos_score = BigramAssocMeasures.chi_sq(cond_word_fd['pos'][word], (freq, pos_word_count), total_word_count)
         neg_score = BigramAssocMeasures.chi_sq(cond_word_fd['neg'][word], (freq, neg_word_count), total_word_count)
         word_scores[word] = pos_score + neg_score
@@ -74,7 +74,7 @@ def create_word_bigram_scores():
 
 def find_best_words(word_scores, number):
 
-    best_vals = sorted(word_scores.iteritems(), key=lambda w, s: s, reverse=True)[:number] #把词按信息量倒序排序。number是特征的维度，是可以不断调整直至最优的
+    best_vals = sorted(word_scores.items(), key=lambda item: item[1], reverse=True)[:number] #把词按信息量倒序排序。number是特征的维度，是可以不断调整直至最优的
     best_words = set([w for w, s in best_vals])
     return best_words
 

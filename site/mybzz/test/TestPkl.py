@@ -1,6 +1,8 @@
 import pickle
 import tkinter
 
+import sys
+
 from site.mybzz.util import DbUtil
 import jieba
 
@@ -23,16 +25,19 @@ def add(index, f):
     global count
     count += 1
     text.delete(0.0, tkinter.END)
-    text.insert(tkinter.END, comments[index][2])
+    if comments[index]:
+        text.insert(0.0, comments[index][2])
     text.update()
     if f:
         pos.append(lists[index])
     else:
         neg.append(lists[index])
+    if count > len(comments):
+        sys.exit()
 
 
 def read():
-    pos = pickle.load(open("pos_review.pkl",'rb'))
+    pos = pickle.load(open("pos_review.pkl", 'rb'))
     neg = pickle.load(open("neg_review.pkl", 'rb'))
     print(pos)
     print(neg)
@@ -67,4 +72,3 @@ if __name__ == '__main__':
 
     pickle.dump(pos, file=open('pos_review.pkl', 'wb'))
     pickle.dump(neg, file=open('neg_review.pkl', 'wb'))
-
