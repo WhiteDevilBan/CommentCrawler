@@ -46,7 +46,6 @@ def add(f):
     text.update()
 
 
-
 def read():
     pos = pickle.load(open("pos_review.pkl", 'rb'))
     neg = pickle.load(open("neg_review.pkl", 'rb'))
@@ -66,7 +65,7 @@ if __name__ == '__main__':
     while [] in neg:
         neg.pop(neg.index([]))
 
-    comments = list(DbUtil.getAllResult("select * from comment limit 100 offset 0"))
+    comments = list(DbUtil.getAllResult("select * from comment limit 10000 offset 20000"))
 
     shuffle(comments)
     comments = comments[:100]
@@ -98,5 +97,5 @@ if __name__ == '__main__':
 
     tkinter.mainloop()
 
-    pickle.dump(pos, file=open('pos_review.pkl', 'wb'))
-    pickle.dump(neg, file=open('neg_review.pkl', 'wb'))
+    # pickle.dump(pos, file=open('pos_review.pkl', 'wb'))
+    # pickle.dump(neg, file=open('neg_review.pkl', 'wb'))

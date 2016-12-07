@@ -61,7 +61,7 @@ def best_word_features(words):
 
 if __name__ == '__main__':
     dimension = ['20', '40', '60', '80', '100', '120']
-    index = 5
+    index = 10
     for d in dimension:
         word_scores = NltkUtil.create_word_bigram_scores()
         best_words = NltkUtil.find_best_words(word_scores, int(d))
