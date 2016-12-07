@@ -5,7 +5,7 @@ from nltk.collocations import BigramCollocationFinder
 from nltk.metrics import BigramAssocMeasures
 from sklearn.metrics import accuracy_score
 from sklearn.svm import SVC, LinearSVC, NuSVC
-
+from sklearn.metrics import classification_report
 from site.mybzz.test import NltkUtil
 
 pos = pickle.load(open('pos_review.pkl', 'rb'))
@@ -49,6 +49,9 @@ def score(classifier):
     classifier.train(train)  # 训练分类器
 
     pred = classifier.classify_many(dev)  # 对开发测试集的数据进行分类，给出预测的标签
+
+    print(classification_report(tag_dev,pred))
+    print('\n')
     return accuracy_score(tag_dev, pred)  # 对比分类预测结果和人工标注的正确结果，给出分类器准确度
 
 
@@ -57,8 +60,8 @@ def best_word_features(words):
 
 
 if __name__ == '__main__':
-    dimension = ['500', '1000', '1500', '2000', '2500', '3000']
-
+    dimension = ['20', '40', '60', '80', '100', '120']
+    index = 5
     for d in dimension:
         word_scores = NltkUtil.create_word_bigram_scores()
         best_words = NltkUtil.find_best_words(word_scores, int(d))
@@ -66,12 +69,13 @@ if __name__ == '__main__':
         posFeatures = pos_features(best_word_features)
         negFeatures = neg_features(best_word_features)
 
-        train = posFeatures[0:] + negFeatures[0:]
-        devtest = posFeatures[5:10] + negFeatures[5:10]
+        train = posFeatures[index:] + negFeatures[index:]
+        devtest = posFeatures[:index] + negFeatures[:index]
         test = posFeatures[:5] + negFeatures[:5]
         dev, tag_dev = zip(*devtest)
 
         print('Feature number %s' % d)
-        print('SVC accuracy is %5.2f %%' % (score(SVC()) * 100))
+        # print('SVC accuracy is %5.2f %%' % (score(SVC()) * 100))
         print('LinearSVC accuracy is %5.2f %%' % (score(LinearSVC()) * 100))
-        print('NuSVC accuracy is %5.2f %%' % (score(NuSVC(nu=0.01)) * 100))
+        # print('NuSVC accuracy is %5.2f %%' % (score(NuSVC(nu=0.01)) * 100))
+        print("\n")

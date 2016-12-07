@@ -15,18 +15,18 @@ def create_word_scores():
     word_fd = FreqDist()  # 可统计所有词的词频
     cond_word_fd = ConditionalFreqDist()  # 可统计积极文本中的词频和消极文本中的词频
     for word in posWords:
-        word_fd.inc(word)
-        cond_word_fd['pos'].inc(word)
+        word_fd[word] += 1
+        cond_word_fd['pos'][word] += 1
     for word in negWords:
-        word_fd.inc(word)
-        cond_word_fd['neg'].inc(word)
+        word_fd[word] += 1
+        cond_word_fd['neg'][word] += 1
 
     pos_word_count = cond_word_fd['pos'].N()  # 积极词的数量
     neg_word_count = cond_word_fd['neg'].N()  # 消极词的数量
     total_word_count = pos_word_count + neg_word_count
 
     word_scores = {}
-    for word, freq in word_fd.iteritems():
+    for word, freq in word_fd.items():
         pos_score = BigramAssocMeasures.chi_sq(cond_word_fd['pos'][word], (freq, pos_word_count),
                                                total_word_count)  # 计算积极词的卡方统计量，这里也可以计算互信息等其它统计量
         neg_score = BigramAssocMeasures.chi_sq(cond_word_fd['neg'][word], (freq, neg_word_count),
@@ -43,10 +43,10 @@ def create_word_bigram_scores():
     posWords = list(itertools.chain(*posdata))
     negWords = list(itertools.chain(*negdata))
 
-    bigram_finder = BigramCollocationFinder.from_words(posWords)
-    bigram_finder = BigramCollocationFinder.from_words(negWords)
-    posBigrams = bigram_finder.nbest(BigramAssocMeasures.chi_sq, 5000)
-    negBigrams = bigram_finder.nbest(BigramAssocMeasures.chi_sq, 5000)
+    bigram_finder_pos = BigramCollocationFinder.from_words(posWords)
+    bigram_finder_neg = BigramCollocationFinder.from_words(negWords)
+    posBigrams = bigram_finder_pos.nbest(BigramAssocMeasures.chi_sq, 5000)
+    negBigrams = bigram_finder_neg.nbest(BigramAssocMeasures.chi_sq, 5000)
 
     pos = posWords + posBigrams  # 词和双词搭配
     neg = negWords + negBigrams
