@@ -6,7 +6,9 @@ from nltk.metrics import BigramAssocMeasures
 from sklearn.metrics import accuracy_score
 from sklearn.svm import SVC, LinearSVC, NuSVC
 from sklearn.metrics import classification_report
+from sklearn.metrics import precision_recall_fscore_support
 from site.mybzz.test import NltkUtil
+import matplotlib.pyplot as plt
 
 pos = pickle.load(open('pos_review.pkl', 'rb'))
 neg = pickle.load(open('neg_review.pkl', 'rb'))
@@ -50,9 +52,12 @@ def score(classifier):
 
     pred = classifier.classify_many(dev)  # 对开发测试集的数据进行分类，给出预测的标签
 
-    print(classification_report(tag_dev,pred))
-    print('\n')
-    return accuracy_score(tag_dev, pred)  # 对比分类预测结果和人工标注的正确结果，给出分类器准确度
+    # print(precision_recall_fscore_support(tag_dev,pred))
+    # print('\n')
+    # print(classification_report(tag_dev, pred))
+    # print('\n')
+    return precision_recall_fscore_support(tag_dev, pred)
+    # return accuracy_score(tag_dev, pred)  # 对比分类预测结果和人工标注的正确结果，给出分类器准确度
 
 
 def best_word_features(words):
@@ -60,8 +65,19 @@ def best_word_features(words):
 
 
 if __name__ == '__main__':
-    dimension = ['20', '40', '60', '80', '100', '120']
-    index = 10
+    dimension = range(220, 350, 10)
+    method_list = ['precision', 'recall', 'fscore']
+    index = 70
+    pos_dict = {}
+    pos_pre_list = []
+    pos_recall_list = []
+    pos_f_list = []
+
+    neg_dict = {}
+    neg_pre_list = []
+    neg_recall_list = []
+    neg_f_list = []
+    
     for d in dimension:
         word_scores = NltkUtil.create_word_bigram_scores()
         best_words = NltkUtil.find_best_words(word_scores, int(d))
@@ -74,8 +90,45 @@ if __name__ == '__main__':
         test = posFeatures[:5] + negFeatures[:5]
         dev, tag_dev = zip(*devtest)
 
-        print('Feature number %s' % d)
+        # print('Feature number %s' % d)
+        precision,recall,fscore,support = score(LinearSVC())
+        pos_pre_list.append(round(precision[1],3))
+        pos_recall_list.append(round(recall[1], 3))
+        pos_f_list.append(round(fscore[1], 3))
+
+        neg_pre_list.append(round(precision[0], 3))
+        neg_recall_list.append(round(recall[0], 3))
+        neg_f_list.append(round(fscore[0], 3))
         # print('SVC accuracy is %5.2f %%' % (score(SVC()) * 100))
-        print('LinearSVC accuracy is %5.2f %%' % (score(LinearSVC()) * 100))
+        # print('LinearSVC accuracy is %5.2f %%' % (score(LinearSVC()) * 100))
         # print('NuSVC accuracy is %5.2f %%' % (score(NuSVC(nu=0.01)) * 100))
-        print("\n")
+        # print("\n")
+    
+    pos_dict['precision'] = pos_pre_list
+    pos_dict['recall'] = pos_recall_list
+    pos_dict['fscore'] = pos_f_list
+    
+    neg_dict['precision'] = neg_pre_list
+    neg_dict['recall'] = neg_recall_list
+    neg_dict['fscore'] = neg_f_list
+    
+    # 画图
+    for method in method_list:
+        plt.plot(dimension, pos_dict[method], '--^', label=method)
+        plt.title('pos svm')
+        plt.xlabel('feature num')
+        plt.ylabel('score')
+        plt.ylim((0.75, 0.95))
+
+    plt.legend(loc='upper right', numpoints=1)
+    plt.show()
+
+    for method in method_list:
+        plt.plot(dimension, neg_dict[method], '--^', label=method)
+        plt.title('neg svm')
+        plt.xlabel('feature num')
+        plt.ylabel('score')
+        plt.ylim((0.75, 0.95))
+
+    plt.legend(loc='upper right', numpoints=1)
+    plt.show()
