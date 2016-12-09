@@ -65,7 +65,7 @@ if __name__ == '__main__':
     while [] in neg:
         neg.pop(neg.index([]))
 
-    comments = list(DbUtil.getAllResult("select * from comment limit 10000 offset 420000"))
+    comments = list(DbUtil.getAllResult("select * from comment limit 10000 offset 600000"))
 
     shuffle(comments)
     comments = comments[:100]

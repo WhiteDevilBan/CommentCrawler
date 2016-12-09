@@ -65,9 +65,9 @@ def best_word_features(words):
 
 
 if __name__ == '__main__':
-    dimension = range(220, 350, 10)
+    dimension = range(300, 500, 20)
     method_list = ['precision', 'recall', 'fscore']
-    index = 70
+    index = 150
     pos_dict = {}
     pos_pre_list = []
     pos_recall_list = []
@@ -91,7 +91,7 @@ if __name__ == '__main__':
         dev, tag_dev = zip(*devtest)
 
         # print('Feature number %s' % d)
-        precision,recall,fscore,support = score(LinearSVC())
+        precision,recall,fscore,support = score(LinearSVC(C=0.1))
         pos_pre_list.append(round(precision[1],3))
         pos_recall_list.append(round(recall[1], 3))
         pos_f_list.append(round(fscore[1], 3))
@@ -124,7 +124,7 @@ if __name__ == '__main__':
     plt.show()
 
     for method in method_list:
-        plt.plot(dimension, neg_dict[method], '--^', label=method)
+        plt.plot(dimension, neg_dict[method], '--*', label=method)
         plt.title('neg svm')
         plt.xlabel('feature num')
         plt.ylabel('score')
