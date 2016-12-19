@@ -9,6 +9,7 @@ from sklearn.metrics import classification_report
 from sklearn.metrics import precision_recall_fscore_support
 from site.mybzz.test import NltkUtil
 import matplotlib.pyplot as plt
+from sklearn.externals import joblib
 
 pos = pickle.load(open('pos_review.pkl', 'rb'))
 neg = pickle.load(open('neg_review.pkl', 'rb'))
@@ -47,17 +48,13 @@ def neg_features(feature_extraction_method):
 
 
 def score(classifier):
-    classifier = nltk.SklearnClassifier(classifier)  # 在nltk 中使用scikit-learn 的接口
-    classifier.train(train)  # 训练分类器
-
+    # classifier = nltk.SklearnClassifier(classifier)  # 在nltk 中使用scikit-learn 的接口
+    # classifier.train(train)  # 训练分类器
+    classifier = joblib.load('model.m')
+    # joblib.dump(classifier,'model.m')
     pred = classifier.classify_many(dev)  # 对开发测试集的数据进行分类，给出预测的标签
 
-    # print(precision_recall_fscore_support(tag_dev,pred))
-    # print('\n')
-    # print(classification_report(tag_dev, pred))
-    # print('\n')
     return precision_recall_fscore_support(tag_dev, pred)
-    # return accuracy_score(tag_dev, pred)  # 对比分类预测结果和人工标注的正确结果，给出分类器准确度
 
 
 def best_word_features(words):
@@ -65,7 +62,7 @@ def best_word_features(words):
 
 
 if __name__ == '__main__':
-    dimension = range(300, 500, 20)
+    dimension = range(200, 700, 50)
     method_list = ['precision', 'recall', 'fscore']
     index = 150
     pos_dict = {}
