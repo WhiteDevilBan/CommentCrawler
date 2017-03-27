@@ -97,5 +97,5 @@ if __name__ == '__main__':
 
     tkinter.mainloop()
 
-    pickle.dump(pos, file=open('pos_review.pkl', 'wb'))
-    pickle.dump(neg, file=open('neg_review.pkl', 'wb'))
+    # pickle.dump(pos, file=open('pos_review.pkl', 'wb'))
+    # pickle.dump(neg, file=open('neg_review.pkl', 'wb'))

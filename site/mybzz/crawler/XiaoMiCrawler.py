@@ -10,7 +10,7 @@ def getTop30():
     result = BsUtil.praseJson(
         'http://market.xiaomi.com/apm/toplist/15?clientId=2bb48bb54747e03a6ab667ab7b51050a&co=CN&la=zh&os=1461822601&page=%d&sdk=22&stamp=0' % page)
     # print(result)
-    for game in result['listApp'][28:]:
+    for game in result['listApp']:
         print('游戏名：%s，id：%s，总评分：%s' % (game['displayName'], game['id'], game['ratingScore']))
         try:
             getData(game['id'], game['displayName'], game['ratingScore'])

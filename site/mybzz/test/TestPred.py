@@ -1,8 +1,11 @@
+from random import shuffle
+
 from sklearn.externals import joblib
 
 from site.mybzz.test import NltkUtil
 from site.mybzz.util import DbUtil
 import jieba
+from site.mybzz.test import Ran
 
 stop = []
 
@@ -36,34 +39,43 @@ if __name__ == '__main__':
 
     comments = list(DbUtil.getAllResult("select * from comment"))
 
-    lists = []
-    for comment in comments:
-        list = []
-        result = jieba.cut(comment[2])
-        for word in result:
-            if word not in stop and word != ' ':
-                list.append(word)
-
-        lists.append(list)
-
-    word_scores = NltkUtil.create_word_bigram_scores()
-    best_words = NltkUtil.find_best_words(word_scores, int(500))
-
-    dataset = features(toDict)
-
-    clf = joblib.load('model.m')
-
-    tags = clf.classify_many(dataset)
-    count = 0
+    shuffle(comments)
     conn, cur = DbUtil.getConn()
-    for tag in tags:
-        if (tag == 'pos'):
-            print('UPDATE comment set type = %d where id = %d;' % (1, comments[count][0]))
-            cur.execute('UPDATE comment set type = %d where id = %d;' % (1, comments[count][0]))
-        else:
-            print('UPDATE comment set type = %d where id = %d;' % (2, comments[count][0]))
-            cur.execute('UPDATE comment set type = %d where id = %d;' % (2, comments[count][0]))
-        count += 1
-
-    conn.commit()
+    for i in range(0,1065000,1000):
+        print(i)
+        for comment in comments[i:i+1000]:
+            print('UPDATE comment set comment_time = "%s" where id =%s' %(Ran.getTime(int(i/1000+1)%30+1),comment[0]))
+            cur.execute('UPDATE comment set comment_time = "%s" where id =%s' %(Ran.getTime(int(i/1000+1)%30+1),comment[0]))
+        conn.commit()
     DbUtil.close(conn,cur)
+    # lists = []
+    # for comment in comments:
+    #     list = []
+    #     result = jieba.cut(comment[2])
+    #     for word in result:
+    #         if word not in stop and word != ' ':
+    #             list.append(word)
+    #
+    #     lists.append(list)
+    #
+    # word_scores = NltkUtil.create_word_bigram_scores()
+    # best_words = NltkUtil.find_best_words(word_scores, int(500))
+    #
+    # dataset = features(toDict)
+    #
+    # clf = joblib.load('model.m')
+    #
+    # tags = clf.classify_many(dataset)
+    # count = 0
+    # conn, cur = DbUtil.getConn()
+    # for tag in tags:
+    #     if (tag == 'pos'):
+    #         print('UPDATE comment set type = %d where id = %d;' % (1, comments[count][0]))
+    #         cur.execute('UPDATE comment set type = %d where id = %d;' % (1, comments[count][0]))
+    #     else:
+    #         print('UPDATE comment set type = %d where id = %d;' % (2, comments[count][0]))
+    #         cur.execute('UPDATE comment set type = %d where id = %d;' % (2, comments[count][0]))
+    #     count += 1
+    #
+    # conn.commit()
+    # DbUtil.close(conn,cur)

@@ -21,7 +21,11 @@ def bag_of_words(words):
 
 def bigram(words, score_fn=BigramAssocMeasures.chi_sq, n=1000):
     bigram_finder = BigramCollocationFinder.from_words(words)  # 把文本变成双词搭配的形式
-    bigrams = bigram_finder.nbest(score_fn, n)  # 使用了卡方统计的方法，选择排名前1000的双词
+    bigrams= []
+    try:
+        bigrams = bigram_finder.nbest(score_fn, n)  # 使用了卡方统计的方法，选择排名前1000的双词
+    except:
+        pass
     return bag_of_words(bigrams)
 
 
@@ -48,13 +52,23 @@ def neg_features(feature_extraction_method):
 
 
 def score(classifier):
-    # classifier = nltk.SklearnClassifier(classifier)  # 在nltk 中使用scikit-learn 的接口
-    # classifier.train(train)  # 训练分类器
+    classifier = nltk.SklearnClassifier(classifier)  # 在nltk 中使用scikit-learn 的接口
+    classifier.train(train)  # 训练分类器
     classifier = joblib.load('model.m')
     # joblib.dump(classifier,'model.m')
     pred = classifier.classify_many(dev)  # 对开发测试集的数据进行分类，给出预测的标签
 
     return precision_recall_fscore_support(tag_dev, pred)
+
+def score2(classifier):
+    classifier = nltk.SklearnClassifier(classifier)  # 在nltk 中使用scikit-learn 的接口
+    classifier.train(train)  # 训练分类器
+
+    pred = classifier.classify_many(dev)  # 对开发测试集的数据进行分类，给出预测的标签
+
+    # print(classification_report(tag_dev, pred))
+    # print('\n')
+    return accuracy_score(tag_dev, pred)  # 对比分类预测结果和人工标注的正确结果，给出分类器准确度
 
 
 def best_word_features(words):
@@ -62,7 +76,7 @@ def best_word_features(words):
 
 
 if __name__ == '__main__':
-    dimension = range(200, 700, 50)
+    dimension = range(100, 700, 50)
     method_list = ['precision', 'recall', 'fscore']
     index = 150
     pos_dict = {}
@@ -81,6 +95,8 @@ if __name__ == '__main__':
 
         posFeatures = pos_features(best_word_features)
         negFeatures = neg_features(best_word_features)
+        # posFeatures = pos_features(bag_of_words)  # 使用所有词作为特征
+        # negFeatures = neg_features(bag_of_words)
 
         train = posFeatures[index:] + negFeatures[index:]
         devtest = posFeatures[:index] + negFeatures[:index]
@@ -88,6 +104,7 @@ if __name__ == '__main__':
         dev, tag_dev = zip(*devtest)
 
         # print('Feature number %s' % d)
+        print(score2(LinearSVC(C=0.1)))
         precision,recall,fscore,support = score(LinearSVC(C=0.1))
         pos_pre_list.append(round(precision[1],3))
         pos_recall_list.append(round(recall[1], 3))
@@ -115,7 +132,7 @@ if __name__ == '__main__':
         plt.title('pos svm')
         plt.xlabel('feature num')
         plt.ylabel('score')
-        plt.ylim((0.75, 0.95))
+        plt.ylim((0.8, 0.95))
 
     plt.legend(loc='upper right', numpoints=1)
     plt.show()
@@ -125,7 +142,7 @@ if __name__ == '__main__':
         plt.title('neg svm')
         plt.xlabel('feature num')
         plt.ylabel('score')
-        plt.ylim((0.75, 0.95))
+        plt.ylim((0.8, 0.95))
 
     plt.legend(loc='upper right', numpoints=1)
     plt.show()
